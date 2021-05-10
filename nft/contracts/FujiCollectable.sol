@@ -7,13 +7,18 @@ contract FujiCollectable is ERC721, VRFConsumerBase {
 
     bytes32 internal keyHash;
     uint256 public fee;
+    uint256 public tokenCounter = 0;
+
+    enum Breed {PUG, SHIBA_INU, ST_BERNARD} //temp
 
     mapping(bytes32 => address) public requestIdToSender;
     mapping(bytes32 => string) public requestIdToTokenURI;
+    mapping(uint256 => Breed) public tokenIdToBreed; //temp
+    mapping(bytes32 => uint256) public requestIdToTokenId;
     event requestedCollectible(bytes32 indexed requestId);
 
     constructor(address _VRFCoordinator, address _LinkToken, bytes32 _keyhash) public
-    VRFConsumer(_VRFCoordinator, _LinkToken)
+    VRFConsumerBase(_VRFCoordinator, _LinkToken)
     ERC721("FujiPhotographs", "FUJI")
     {
         keyHash = _keyhash;
@@ -26,5 +31,25 @@ contract FujiCollectable is ERC721, VRFConsumerBase {
         requestIdToSender[requestId] = msg.sender;
         requestIdToTokenURI[requestId] = tokenURI;
         emit requestedCollectible(requestId);
+    }
+
+    function fulfillRandomness(bytes32 requestId, uint256 randomNumber) internal override {
+        address fujiOwner = requestIdToSender[requestId];
+        string memory tokenURI = requestIdToTokenURI[requestId];
+        uint256 newItemId = tokenCounter;
+        _safeMint(fujiOwner, newItemId);
+        _setTokenURI(newItemId, tokenURI);
+        Breed breed = Breed(randomNumber % 3); //temp
+        tokenIdToBreed[newItemId] = breed; //temp
+        requestIdToTokenId[requestId] = newItemId;
+        tokenCounter = tokenCounter + 1;
+    }
+
+    function setTokenURI(uint256 tokenId, string memory _tokenURI) public {
+        require(
+            _isApprovedOrOwner(_msgSender(), tokenId),
+            "ERC721: Transfer caller is not owner nor approved"
+        );
+        _setTokenURI(tokenId, _tokenURI);
     }
 }
