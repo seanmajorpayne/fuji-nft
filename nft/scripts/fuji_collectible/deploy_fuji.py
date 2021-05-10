@@ -1,4 +1,5 @@
 from brownie import FujiCollectible, accounts, network, config
+from scripts.helpful_scripts import fund_advanced_collectible
 
 
 def main():
@@ -12,3 +13,5 @@ def main():
         {"from": dev},
         publish_source=publish_source,
     )
+    fund_advanced_collectible(fuji_collectible)
+    return fuji_collectible
