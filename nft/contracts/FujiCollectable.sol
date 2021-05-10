@@ -3,7 +3,7 @@ pragma solidity 0.6.6;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@chainlink/contracts/src/v0.6/VRFConsumerBase.sol";
 
-contract FujiCollectable is ERC721, VRFConsumerBase {
+contract FujiCollectible is ERC721, VRFConsumerBase {
 
     bytes32 internal keyHash;
     uint256 public fee;
